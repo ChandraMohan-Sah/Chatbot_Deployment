@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+    <style>
+        /* Custom styles for chat bubbles */
+        .chat-bubble {
+            max-width: 70%; /* Limit bubble width */
+            word-wrap: break-word;
+            padding: 10px 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            display: inline-block;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        /* User messages on the right */
+        .user-bubble {
+            background-color: #dcf8c6;
+            float: right; /* Align to the right */
+            text-align: left; /* Align text inside the bubble */
+            margin-left: auto; /* Push away from the left */
+        }
+
+        /* Bot messages on the left */
+        .bot-bubble {
+            background-color: #ffffff;
+            float: left; /* Align to the left */
+            text-align: left; /* Align text inside the bubble */
+            margin-right: auto; /* Push away from the right */
+        }
+
+        /* Clear floating elements */
+        .clearfix {
+            clear: both;
+        }
+
+        /* Background */
+        body {
+            background-color: #f5f5f5;
+        }
+
+        .w3-padding.w3-border.w3-round-large.w3-content {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="w3-content w3-card w3-margin-top w3-padding w3-round-large w3-light-grey" style="max-width: 850px; padding-top:80px; ">
+        <div class="w3-row w3-padding w3-light-grey">
+            <h1 class="w3-center w3-text-primary w3-monospace w3-text-pink">🤖<span class="w3-border w3-round-large">Chatbot</span>🤖</h1>
+        </div>
+
+        <!-- Chat Box -->
+        <div class="w3-padding w3-border w3-round-large w3-content" style="max-height: 500px; overflow-y: auto;">
+            {% if chat_history %}
+                {% for message in chat_history %}
+                    <div class="chat-bubble 
+                                {% if message.role == 'user' %}user-bubble{% else %}bot-bubble{% endif %}">
+                        {% if "img" in message.content|safe %}
+                            {{ message.content|safe }}
+
+                        {% else %}
+                            <p>{{ message.content|safe }}</p>
+                        {% endif %}
+                        <span class="w3-small w3-text-grey w3-tiny">{{ message.timestamp|default:"Now" }}</span>
+                    </div>
+                    <div class="clearfix"></div> <!-- Ensure proper alignment -->
+                {% endfor %}
+            {% else %}
+                <div class="w3-content">
+                    <div class="w3-center w3-padding-64">
+                        <p>Welcome! Please ask a question, and I'll be happy to assist you!</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Input Section -->
+        <div class="w3-row w3-padding  w3-light-grey" style="display: flex; align-items: center;">
+            <!-- Image Upload Form -->
+
+            <form method="post" enctype="multipart/form-data" action="{% url 'upload_image' %}" class="w3-container" style="flex: 0 0 auto; margin-right: 10px;">
+                {% csrf_token %}
+                <label for="photo-upload" class="w3-btn w3-light-grey w3-round w3-border " style="cursor: pointer;">📷</label>
+                <input type="file" id="photo-upload" name="image" accept="image/*" required onchange="this.form.submit();" style="display: none;">
+            </form>
+
+            <!-- Question Input Form -->
+            <form method="post" action="{% url 'chatbot' %}" class="w3-container w3-row" style="display: flex; align-items: center; flex: 1;">
+                {% csrf_token %}
+                <input type="text" name="question" class="w3-input w3-border w3-round-xxlarge w3-light-grey w3-margin-right" placeholder="Type a message" style="flex: 1;" required>
+                <button type="submit" class="w3-btn w3-blue w3-round-large w3-hover-shadow-2" style="flex: 0 0 auto;">Send</button>
+            </form>
+        </div>
+    </div>
+</body>
+
+<script>
+    window.onload = function() {
+        scrollToBottom();
+    };
+
+    function scrollToBottom() {
+        var chatBox = document.querySelector('.w3-padding.w3-border.w3-round-large.w3-content');
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // If new messages are dynamically added, call scrollToBottom to keep the chat box scrolled down
+    // You can call this function after adding a new message to your chat history
+</script>
+
+{% endblock %}
